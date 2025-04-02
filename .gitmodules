@@ -1,0 +1,3 @@
+[submodule "lab2"]
+	path = lab2
+	url = https://github.com/toto1949/lab2.git

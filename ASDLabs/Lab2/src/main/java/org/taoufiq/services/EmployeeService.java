@@ -50,7 +50,7 @@ public class EmployeeService {
     }
 
   private String convertToJson(Object obj) throws IOException {
-    ObjectMapper objectMapper = JsonConfig.getMapper(); // Use the configured ObjectMapper
+    ObjectMapper objectMapper = JsonConfig.getMapper(); 
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     return objectMapper.writeValueAsString(obj);
 }   

@@ -1,8 +1,6 @@
 package com.taoufiq.Lab6.Services;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,49 +22,38 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
-    // Add this new method to your existing UserService
-    public void addRolesToUser(String username, List<String> roleNames) {
-        User user = userRepository.findByUsernameWithRoles(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        Set<Role> roles = user.getRoles();
-        if (roles == null) {
-            roles = new HashSet<>();
+
+
+    public User registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new RuntimeException("Username is already taken.");
         }
-        
-        for (String roleName : roleNames) {
-            Role role = roleRepository.findByName(roleName)
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("Email is already in use.");
+        }
+    
+        if (user.getPassword() == null) {
+            throw new RuntimeException("Password cannot be null");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
+    
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            Role defaultRole = roleRepository.findByName("ROLE_USER")
                     .orElseGet(() -> {
                         Role newRole = new Role();
-                        newRole.setName(roleName);
+                        newRole.setName("ROLE_USER");
                         return roleRepository.save(newRole);
                     });
-            roles.add(role);
-        }
-        
-        user.setRoles(roles);
-        userRepository.save(user);
-    }
-
-    public boolean existsByUsername(String username) {
-        return userRepository.findByUsernameWithRoles(username).isPresent();
-    }
-    
-    public User registerUser(String username, String password, Set<String> roleNames) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-    
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            Role role = roleRepository.findByName(roleName)
-                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-            roles.add(role);
+            user.setRoles(List.of(defaultRole)); 
         }
     
-        user.setRoles(roles);
         return userRepository.save(user);
     }
     
+
 }

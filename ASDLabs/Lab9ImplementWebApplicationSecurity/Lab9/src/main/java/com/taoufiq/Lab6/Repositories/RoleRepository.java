@@ -8,7 +8,6 @@ import com.taoufiq.Lab6.Models.Role;
 
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    Optional<Role> findByName(String name);
-
+    public abstract Optional<Role> findByName(String name);
 }
 
